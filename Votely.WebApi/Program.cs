@@ -4,7 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<CarService>();
+
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();

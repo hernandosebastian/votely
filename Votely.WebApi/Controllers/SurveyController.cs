@@ -1,5 +1,5 @@
+using Votely.Application.Survey.Services;
 using Microsoft.AspNetCore.Mvc;
-using Votely.Application.Surveys.Services;
 
 namespace Votely.WebApi.Controllers;
 
@@ -7,15 +7,15 @@ namespace Votely.WebApi.Controllers;
 [Route("api/survey")]
 public class SurveyController : ControllerBase
 {
-    private readonly SurveyService _surveyService;
+    private readonly ISurveyService _surveyService;
 
-    public SurveyController(SurveyService surveyService)
+    public SurveyController(ISurveyService surveyService)
     {
         _surveyService = surveyService;
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetSurvey(int id)
+    public async Task<IActionResult> GetSurvey(Guid id)
     {
         try
         {
@@ -43,7 +43,7 @@ public class SurveyController : ControllerBase
     }
 
     [HttpPost("{surveyId}/question")]
-    public async Task<IActionResult> AddQuestion(int surveyId, [FromBody] CreateQuestionDto dto)
+    public async Task<IActionResult> AddQuestion(Guid surveyId, [FromBody] CreateQuestionDto dto)
     {
         try
         {
@@ -57,7 +57,7 @@ public class SurveyController : ControllerBase
     }
 
     [HttpPost("{surveyId}/question/{questionId}/option")]
-    public async Task<IActionResult> AddOption(int surveyId, int questionId, [FromBody] CreateOptionDto dto)
+    public async Task<IActionResult> AddOption(Guid surveyId, Guid questionId, [FromBody] CreateOptionDto dto)
     {
         try
         {

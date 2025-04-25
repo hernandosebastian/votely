@@ -1,3 +1,5 @@
+namespace Votely.Infrastructure.Database.Models;
+    
 public class Question
 {
     public Guid QuestionId { get; set; }

@@ -1,4 +1,5 @@
-using Votely.Application.Survey.Services;
+using Votely.Application.Surveys;
+using Votely.Application.Surveys.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Votely.WebApi.Controllers;

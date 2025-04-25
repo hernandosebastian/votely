@@ -1,6 +1,6 @@
 using Votely.Application.Surveys.DTOs;
 
-namespace Votely.Application.Surveys.Services;
+namespace Votely.Application.Surveys;
 
 public interface ISurveyService
 {

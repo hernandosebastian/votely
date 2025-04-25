@@ -1,6 +1,6 @@
 namespace Votely.Application.Surveys.DTOs;
 
-public class CreateSurveyDto
+public class CreateOptionDto
 {
-    public string Title { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
 }

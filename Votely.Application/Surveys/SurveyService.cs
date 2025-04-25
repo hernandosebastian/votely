@@ -1,4 +1,7 @@
-namespace Votely.Application.Surveys.Services;
+using Votely.Application.Surveys.DTOs;
+using Votely.Domain;
+
+namespace Votely.Application.Surveys;
 
 public class SurveyService : ISurveyService
 {
@@ -6,20 +9,20 @@ public class SurveyService : ISurveyService
 
     public async Task<SurveyDto> GetSurveyByIdAsync(Guid id)
     {
-        var survey = _surveys.FirstOrDefault(s => s.Id == id);
+        var survey = _surveys.FirstOrDefault(s => s.SurveyId == id);
         if (survey == null) throw new Exception("Survey not found");
 
         return new SurveyDto
         {
-            Id = survey.Id,
+            Id = survey.SurveyId,
             Title = survey.Title,
             Questions = survey.Questions.Select(q => new QuestionDto
             {
-                Id = q.Id,
+                Id = q.QuestionId,
                 Title = q.Title,
                 Options = q.Options.Select(o => new OptionDto
                 {
-                    Id = o.Id,
+                    Id = o.OptionId,
                     Text = o.Text,
                     Votes = o.Votes
                 }).ToList()
@@ -34,7 +37,7 @@ public class SurveyService : ISurveyService
 
         return new SurveyDto
         {
-            Id = survey.Id,
+            Id = survey.SurveyId,
             Title = survey.Title,
             Questions = new List<QuestionDto>()
         };
@@ -42,7 +45,7 @@ public class SurveyService : ISurveyService
 
     public async Task<QuestionDto> AddQuestionAsync(Guid surveyId, CreateQuestionDto dto)
     {
-        var survey = _surveys.FirstOrDefault(s => s.Id == surveyId);
+        var survey = _surveys.FirstOrDefault(s => s.SurveyId == surveyId);
         if (survey == null) throw new Exception("Survey not found");
 
         var question = new Question(dto.Title, new List<Option>());
@@ -50,7 +53,7 @@ public class SurveyService : ISurveyService
 
         return new QuestionDto
         {
-            Id = question.Id,
+            Id = question.QuestionId,
             Title = question.Title,
             Options = new List<OptionDto>()
         };
@@ -58,10 +61,10 @@ public class SurveyService : ISurveyService
 
     public async Task<OptionDto> AddOptionAsync(Guid surveyId, Guid questionId, CreateOptionDto dto)
     {
-        var survey = _surveys.FirstOrDefault(s => s.Id == surveyId);
+        var survey = _surveys.FirstOrDefault(s => s.SurveyId== surveyId);
         if (survey == null) throw new Exception("Survey not found");
 
-        var question = survey.Questions.FirstOrDefault(q => q.Id == questionId);
+        var question = survey.Questions.FirstOrDefault(q => q.QuestionId == questionId);
         if (question == null) throw new Exception("Question not found");
 
         var option = new Option(dto.Text);
@@ -69,7 +72,7 @@ public class SurveyService : ISurveyService
 
         return new OptionDto
         {
-            Id = option.Id,
+            Id = option.OptionId,
             Text = option.Text,
             Votes = option.Votes
         };

@@ -13,10 +13,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Votely.Infrastructure\Votely.Infrastructure.csproj" />
+    <ProjectReference Include="..\Votely.Application\Votely.Application.csproj" />
   </ItemGroup>
 
 </Project>

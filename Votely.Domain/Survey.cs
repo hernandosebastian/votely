@@ -10,6 +10,21 @@ public class Survey
     {
         SurveyId = Guid.NewGuid();
         Title = title;
-        Questions = questions ?? new List<Question>();
+        Questions = questions;
     }
+
+    public Survey(string title)
+    {
+        SurveyId = Guid.NewGuid();
+        Title = title;
+        Questions = new List<Question>();
+    }
+
+    public Survey(Guid surveyId, string title, List<Question> questions)
+    {
+        SurveyId = surveyId;
+        Title = title;
+        Questions = questions;
+    }
+
 }

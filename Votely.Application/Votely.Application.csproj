@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Votely.Domain\votely.domain.csproj" />
+	<ProjectReference Include="..\Votely.Infrastructure\Votely.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

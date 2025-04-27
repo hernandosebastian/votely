@@ -1,80 +1,56 @@
 using Votely.Application.Surveys.DTOs;
+using Votely.Infrastructure;
+using Votely.Application.Mappers;
 using Votely.Domain;
+using Votely.Infrastructure.Surveys;
 
 namespace Votely.Application.Surveys;
 
 public class SurveyService : ISurveyService
 {
-    private readonly List<Survey> _surveys = new();
+    private readonly ISurveyRepository _surveyRepository;
 
-    public async Task<SurveyDto> GetSurveyByIdAsync(Guid id)
+    public SurveyService(ISurveyRepository surveyRepository)
     {
-        var survey = _surveys.FirstOrDefault(s => s.SurveyId == id);
-        if (survey == null) throw new Exception("Survey not found");
-
-        return new SurveyDto
-        {
-            Id = survey.SurveyId,
-            Title = survey.Title,
-            Questions = survey.Questions.Select(q => new QuestionDto
-            {
-                Id = q.QuestionId,
-                Title = q.Title,
-                Options = q.Options.Select(o => new OptionDto
-                {
-                    Id = o.OptionId,
-                    Text = o.Text,
-                    Votes = o.Votes
-                }).ToList()
-            }).ToList()
-        };
+        _surveyRepository = surveyRepository;
     }
 
-    public async Task<SurveyDto> CreateSurveyAsync(CreateSurveyDto dto)
+    public async Task<List<SurveyDto>> GetAllSurveysAsync()
     {
-        var survey = new Survey(dto.Title, new List<Question>());
-        _surveys.Add(survey);
-
-        return new SurveyDto
-        {
-            Id = survey.SurveyId,
-            Title = survey.Title,
-            Questions = new List<QuestionDto>()
-        };
+        var surveys = await _surveyRepository.GetAllSurveysAsync();
+        return surveys.Select(s => SurveyMapper.MapToDto(s)).ToList();
     }
 
-    public async Task<QuestionDto> AddQuestionAsync(Guid surveyId, CreateQuestionDto dto)
+    public async Task<SurveyDto> GetSurveyByIdAsync(Guid surveyId)
     {
-        var survey = _surveys.FirstOrDefault(s => s.SurveyId == surveyId);
-        if (survey == null) throw new Exception("Survey not found");
+        var survey = await _surveyRepository.GetSurveyByIdAsync(surveyId);
+        if (survey == null)
+            return null;
 
-        var question = new Question(dto.Title, new List<Option>());
-        survey.Questions.Add(question);
-
-        return new QuestionDto
-        {
-            Id = question.QuestionId,
-            Title = question.Title,
-            Options = new List<OptionDto>()
-        };
+        return SurveyMapper.MapToDto(survey);
     }
 
-    public async Task<OptionDto> AddOptionAsync(Guid surveyId, Guid questionId, CreateOptionDto dto)
+    public async Task<SurveyDto> CreateSurveyAsync(CreateSurveyDto createSurveyDto)
     {
-        var survey = _surveys.FirstOrDefault(s => s.SurveyId== surveyId);
-        if (survey == null) throw new Exception("Survey not found");
+        var model = SurveyMapper.MapToModel(createSurveyDto);
+        var saved = await _surveyRepository.AddSurveyAsync(model);
+        return SurveyMapper.MapToDto(saved);
+    }
 
-        var question = survey.Questions.FirstOrDefault(q => q.QuestionId == questionId);
-        if (question == null) throw new Exception("Question not found");
+    public async Task<SurveyDto?> UpdateSurveyByIdAsync(Guid id, UpdateSurveyDto updateSurveyDto)
+    {
+        updateSurveyDto.Id = id;
+        var model = SurveyMapper.MapUpdateDtoToModel(updateSurveyDto);
+        var updatedModel = await _surveyRepository.UpdateSurveyAsync(model);
+        
+        if (updatedModel == null)
+            return null;
+            
+        return SurveyMapper.MapToDto(updatedModel);
+    }
 
-        var option = new Option(dto.Text);
-        question.Options.Add(option);
-
-        return new OptionDto
-        {
-            Id = option.OptionId,
-            Text = option.Text,
-            Votes = option.Votes
-        };
+    public async Task<bool> DeleteSurveyByIdAsync(Guid surveyId)
+    {
+        return await _surveyRepository.DeleteSurveyByIdAsync(surveyId);
     }
 }

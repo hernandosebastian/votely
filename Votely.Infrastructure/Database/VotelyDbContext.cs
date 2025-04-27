@@ -15,7 +15,7 @@ public class VotelyDbContext : DbContext
         // here you can configure the model mappings between your .NET classes and the database tables.
     }
 
-    public DbSet<Survey> Surveys { get; set; }
-    public DbSet<Question> Questions { get; set; }
-    public DbSet<Option> Options { get; set; }
+    public DbSet<SurveyModel> Surveys { get; set; }
+    public DbSet<QuestionModel> Questions { get; set; }
+    public DbSet<OptionModel> Options { get; set; }
 }

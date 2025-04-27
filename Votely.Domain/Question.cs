@@ -7,9 +7,14 @@ public class Question
     public List<Option> Options { get; set; }
 
     public Question(string title, List<Option> options)
+        : this(Guid.NewGuid(), title, options)
     {
-        QuestionId = Guid.NewGuid();
+    }
+
+    public Question(Guid questionId, string title, List<Option> options)
+    {
+        QuestionId = questionId;
         Title = title;
-        Options = options;
+        Options = options ?? new List<Option>();
     }
 }

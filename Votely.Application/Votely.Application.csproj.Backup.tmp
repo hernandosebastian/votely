@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\votely.domain\votely.domain.csproj" />
+    <ProjectReference Include="..\votely.infrastructure\votely.infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

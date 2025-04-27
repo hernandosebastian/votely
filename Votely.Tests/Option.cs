@@ -13,6 +13,6 @@ public class OptionTests
         var option = new Option(optionText);
 
         Assert.Equal(optionText, option.Text);
-        Assert.Equal(Option.INITIAL_VOTES, option.Votes);
+        Assert.Equal(0, option.Votes);
     }
 }

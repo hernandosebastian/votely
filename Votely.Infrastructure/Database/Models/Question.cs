@@ -1,11 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Votely.Infrastructure.Database.Models;
     
-public class Question
+public class QuestionModel
 {
+    [Key]
     public Guid QuestionId { get; set; }
-    public string Title { get; set; }
-    public ICollection<Option> Options { get; set; }
-
+    public string Title { get; set; } = string.Empty;
     public Guid SurveyId { get; set; }
-    public Survey Survey { get; set; }
+    public SurveyModel Survey { get; set; }
+    public List<OptionModel> Options { get; set; } = new();
 }

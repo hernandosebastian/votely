@@ -2,16 +2,24 @@ namespace Votely.Domain;
 
 public class Option
 {
-    public const int INITIAL_VOTES = 0;
+    public Guid OptionId { get; private set; }
+    public string Text { get; private set; }
+    public int Votes { get; private set; }
 
-    public Guid Id { get; set; }
-    public string Text { get; set; }
-    public int Votes { get; set; }
-
-    public Option(string text)
+    public Option(string text, int votes = 0)
+        : this(Guid.NewGuid(), text, votes)
     {
-        Id = Guid.NewGuid();
+    }
+
+    public Option(Guid optionId, string text, int votes = 0)
+    {
+        OptionId = optionId;
         Text = text;
-        Votes = INITIAL_VOTES;
+        Votes = votes;
+    }
+
+    public void Vote()
+    {
+        Votes++;
     }
 }

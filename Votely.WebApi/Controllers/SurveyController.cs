@@ -1,10 +1,11 @@
-using Votely.Application.Survey.Services;
 using Microsoft.AspNetCore.Mvc;
+using Votely.Application.Surveys;
+using Votely.Application.Surveys.DTOs;
 
 namespace Votely.WebApi.Controllers;
 
 [ApiController]
-[Route("api/survey")]
+[Route("api/surveys")]
 public class SurveyController : ControllerBase
 {
     private readonly ISurveyService _surveyService;
@@ -14,59 +15,51 @@ public class SurveyController : ControllerBase
         _surveyService = surveyService;
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetSurvey(Guid id)
+    [HttpGet]
+    public async Task<IActionResult> GetAllSurveys()
     {
-        try
-        {
-            var result = await _surveyService.GetSurveyByIdAsync(id);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return Problem(e.Message);
-        }
+        var surveys = await _surveyService.GetAllSurveysAsync();
+        return Ok(surveys);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetSurveyById(Guid id)
+    {
+        var survey = await _surveyService.GetSurveyByIdAsync(id);
+
+        if (survey == null)
+            return NotFound();
+
+        return Ok(survey);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateSurvey([FromBody] CreateSurveyDto dto)
+    public async Task<IActionResult> CreateSurvey([FromBody] CreateSurveyDto createSurveyDto)
     {
-        try
-        {
-            var result = await _surveyService.CreateSurveyAsync(dto);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return Problem(e.Message);
-        }
+        var surveyDto = await _surveyService.CreateSurveyAsync(createSurveyDto);
+
+        return CreatedAtAction(nameof(CreateSurvey), new { id = surveyDto.Id }, surveyDto);
     }
 
-    [HttpPost("{surveyId}/question")]
-    public async Task<IActionResult> AddQuestion(Guid surveyId, [FromBody] CreateQuestionDto dto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSurveyDto updateSurveyDto)
     {
-        try
-        {
-            var result = await _surveyService.AddQuestionAsync(surveyId, dto);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return Problem(e.Message);
-        }
+        var updatedSurvey = await _surveyService.UpdateSurveyByIdAsync(id, updateSurveyDto);
+        
+        if (updatedSurvey == null)
+            return NotFound();
+            
+        return Ok(updatedSurvey);
     }
 
-    [HttpPost("{surveyId}/question/{questionId}/option")]
-    public async Task<IActionResult> AddOption(Guid surveyId, Guid questionId, [FromBody] CreateOptionDto dto)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteSurvey(Guid id)
     {
-        try
-        {
-            var result = await _surveyService.AddOptionAsync(surveyId, questionId, dto);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return Problem(e.Message);
-        }
+        var result = await _surveyService.DeleteSurveyByIdAsync(id);
+
+        if (!result)
+            return NotFound();
+
+        return NoContent();
     }
 }

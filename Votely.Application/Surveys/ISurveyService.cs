@@ -1,11 +1,14 @@
 using Votely.Application.Surveys.DTOs;
+using Votely.Domain;
 
-namespace Votely.Application.Surveys.Services;
-
-public interface ISurveyService
+namespace Votely.Application.Surveys
 {
-    Task<SurveyDto> GetSurveyByIdAsync(Guid id);
-    Task<SurveyDto> CreateSurveyAsync(CreateSurveyDto dto);
-    Task<QuestionDto> AddQuestionAsync(Guid surveyId, CreateQuestionDto dto);
-    Task<OptionDto> AddOptionAsync(Guid surveyId, Guid questionId, CreateOptionDto dto);
+    public interface ISurveyService
+    {
+        Task<List<SurveyDto>> GetAllSurveysAsync();
+        Task<SurveyDto> GetSurveyByIdAsync(Guid surveyId);
+        Task<SurveyDto> CreateSurveyAsync(CreateSurveyDto createSurveyDto);
+        Task<SurveyDto?> UpdateSurveyByIdAsync(Guid id, UpdateSurveyDto updateSurveyDto);
+        Task<bool> DeleteSurveyByIdAsync(Guid surveyId);
+    }
 }

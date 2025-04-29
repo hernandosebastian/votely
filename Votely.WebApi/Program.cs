@@ -3,7 +3,6 @@ using Votely.Infrastructure.Database;
 using Votely.Infrastructure.Database.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Votely.Infrastructure.Surveys;
 
 var builder = WebApplication.CreateBuilder(args);
 

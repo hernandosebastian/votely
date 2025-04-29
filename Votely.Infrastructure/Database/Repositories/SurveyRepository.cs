@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Votely.Application.Surveys;
 using Votely.Domain;
-using Votely.Infrastructure.Database;
 using Votely.Infrastructure.Database.Models;
-using Votely.Infrastructure.Surveys;
 
 namespace Votely.Infrastructure.Database.Repositories;
 
@@ -15,49 +14,58 @@ public class SurveyRepository : ISurveyRepository
         _context = context;
     }
 
-    public async Task<List<SurveyModel>> GetAllSurveysAsync()
+    public async Task<List<Survey>> GetAllSurveysAsync()
     {
-        return await _context.Surveys
+        var models = await _context.Surveys
             .Include(s => s.Questions)
             .ThenInclude(q => q.Options)
             .ToListAsync();
+            
+        return models.Select(MapToDomain).ToList();
     }
 
-    public async Task<SurveyModel> GetSurveyByIdAsync(Guid surveyId)
+    public async Task<Survey> GetSurveyByIdAsync(Guid surveyId)
     {
-        return await _context.Surveys
+        var model = await _context.Surveys
             .Include(s => s.Questions)
             .ThenInclude(q => q.Options)
             .FirstOrDefaultAsync(s => s.SurveyId == surveyId);
+            
+        if (model == null)
+            return null;
+            
+        return MapToDomain(model);
     }
 
-    public async Task<SurveyModel> AddSurveyAsync(SurveyModel survey)
+    public async Task<Survey> AddSurveyAsync(Survey survey)
     {
-        await _context.Surveys.AddAsync(survey);
+        var model = MapToModel(survey);
+        await _context.Surveys.AddAsync(model);
         await _context.SaveChangesAsync();
 
-        return survey;
+        return MapToDomain(model);
     }
 
-    public async Task<SurveyModel> UpdateSurveyAsync(SurveyModel survey)
+    public async Task<Survey> UpdateSurveyAsync(Survey survey)
     {
+        var model = MapToModel(survey);
         var existingSurvey = await _context.Surveys
             .Include(s => s.Questions)
             .ThenInclude(q => q.Options)
-            .FirstOrDefaultAsync(s => s.SurveyId == survey.SurveyId);
+            .FirstOrDefaultAsync(s => s.SurveyId == model.SurveyId);
 
         if (existingSurvey == null)
             return null;
 
-        _context.Entry(existingSurvey).CurrentValues.SetValues(survey);
+        _context.Entry(existingSurvey).CurrentValues.SetValues(model);
 
         foreach (var existingQuestion in existingSurvey.Questions.ToList())
         {
-            if (!survey.Questions.Any(q => q.QuestionId == existingQuestion.QuestionId))
+            if (!model.Questions.Any(q => q.QuestionId == existingQuestion.QuestionId))
                 _context.Questions.Remove(existingQuestion);
         }
 
-        foreach (var question in survey.Questions)
+        foreach (var question in model.Questions)
         {
             var existingQuestion = existingSurvey.Questions
                 .FirstOrDefault(q => q.QuestionId == question.QuestionId);
@@ -94,7 +102,7 @@ public class SurveyRepository : ISurveyRepository
         }
 
         await _context.SaveChangesAsync();
-        return existingSurvey;
+        return MapToDomain(existingSurvey);
     }
 
     public async Task<bool> DeleteSurveyByIdAsync(Guid surveyId)
@@ -107,5 +115,43 @@ public class SurveyRepository : ISurveyRepository
         _context.Surveys.Remove(survey);
         await _context.SaveChangesAsync();
         return true;
+    }
+    
+    private static SurveyModel MapToModel(Survey survey)
+    {
+        return new SurveyModel
+        {
+            SurveyId = survey.SurveyId,
+            Title = survey.Title,
+            Questions = survey.Questions.Select(q => new QuestionModel
+            {
+                QuestionId = q.QuestionId,
+                Title = q.Title,
+                SurveyId = survey.SurveyId,
+                Options = q.Options.Select(o => new OptionModel
+                {
+                    OptionId = o.OptionId,
+                    Text = o.Text,
+                    Votes = o.Votes,
+                    QuestionId = q.QuestionId
+                }).ToList()
+            }).ToList()
+        };
+    }
+    
+    private static Survey MapToDomain(SurveyModel model)
+    {
+        var questions = model.Questions.Select(q => 
+            new Question(
+                q.QuestionId,
+                q.Title,
+                q.Options.Select(o => new Option(
+                    o.OptionId,
+                    o.Text,
+                    o.Votes
+                )).ToList()
+            )).ToList();
+            
+        return new Survey(model.SurveyId, model.Title, questions);
     }
 }

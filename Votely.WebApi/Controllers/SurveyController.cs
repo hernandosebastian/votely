@@ -9,57 +9,98 @@ namespace Votely.WebApi.Controllers;
 public class SurveyController : ControllerBase
 {
     private readonly ISurveyService _surveyService;
+    private readonly ILogger<SurveyController> _logger;
 
-    public SurveyController(ISurveyService surveyService)
+    public SurveyController(ISurveyService surveyService, ILogger<SurveyController> logger)
     {
         _surveyService = surveyService;
+        _logger = logger;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllSurveys()
     {
-        var surveys = await _surveyService.GetAllSurveysAsync();
-        return Ok(surveys);
+        try
+        {
+            var surveys = await _surveyService.GetAllSurveysAsync();
+            return Ok(surveys);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all surveys");
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSurveyById(Guid id)
     {
-        var survey = await _surveyService.GetSurveyByIdAsync(id);
+        try
+        {
+            var survey = await _surveyService.GetSurveyByIdAsync(id);
 
-        if (survey == null)
-            return NotFound();
+            if (survey == null)
+                return NotFound(new { error = $"Survey with ID {id} not found" });
 
-        return Ok(survey);
+            return Ok(survey);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving survey with ID {SurveyId}", id);
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateSurvey([FromBody] CreateSurveyDto createSurveyDto)
     {
-        var surveyDto = await _surveyService.CreateSurveyAsync(createSurveyDto);
-
-        return CreatedAtAction(nameof(CreateSurvey), new { id = surveyDto.Id }, surveyDto);
+        try
+        {
+            var surveyDto = await _surveyService.CreateSurveyAsync(createSurveyDto);
+            return CreatedAtAction(nameof(GetSurveyById), new { id = surveyDto.Id }, surveyDto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating survey");
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSurveyDto updateSurveyDto)
     {
-        var updatedSurvey = await _surveyService.UpdateSurveyByIdAsync(id, updateSurveyDto);
-        
-        if (updatedSurvey == null)
-            return NotFound();
+        try
+        {
+            var updatedSurvey = await _surveyService.UpdateSurveyByIdAsync(id, updateSurveyDto);
             
-        return Ok(updatedSurvey);
+            if (updatedSurvey == null)
+                return NotFound(new { error = $"Survey with ID {id} not found" });
+                
+            return Ok(updatedSurvey);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating survey with ID {SurveyId}", id);
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSurvey(Guid id)
     {
-        var result = await _surveyService.DeleteSurveyByIdAsync(id);
+        try
+        {
+            var result = await _surveyService.DeleteSurveyByIdAsync(id);
 
-        if (!result)
-            return NotFound();
+            if (!result)
+                return NotFound(new { error = $"Survey with ID {id} not found" });
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting survey with ID {SurveyId}", id);
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 }

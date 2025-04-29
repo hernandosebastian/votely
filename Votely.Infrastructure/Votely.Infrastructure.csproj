@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Votely.Domain\Votely.Domain.csproj" />
+    <ProjectReference Include="..\Votely.Application\Votely.Application.csproj" />
   </ItemGroup>
 
 </Project>
